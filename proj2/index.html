@@ -1,7 +1,602 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    background-color: white;
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+  kbd {
+    color: #121212;
+  }
+</style>
+<title>CS 184 Mesh Edit</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+  };
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+</head>
+
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2018</h1>
+<h1 align="middle">Project 2: Mesh Edit</h1>
+<h2 align="middle">Edith Llontop and Stefanie Gschwind</h2>
+
+<br><br>
+
+<div>
+
+<h2 align="middle">Overview</h2>
+<p>
+    In this project we dive deeper into geometric models and do so by implementing bezier curves and surfaces. de Casteljau algorithm
+    is the algorithm we used that allowed for us to do this. We also look into manipulating triangle meshes using a half-edge data structure.
+    We learned how to split and flip triangle meshes to get us the desired configuration in the end.
+
+  </p>
+<br>
+
+
+<h2 align="middle">Section I: Bezier Curves and Surfaces</h2>
+
+<h3 align="middle">Part 1: Bezier Curves with 1D de Casteljau Subdivision</h3>
+
+
+<b>
+  Briefly explain de Casteljau's algorithm and how you implemented it in order to evaluate Bezier curves.
+</b>
+<p>
+  We implemented de Casteljau's algorithm by iterating through all given control points and evaluating them at parameter t. For each point, we compute the equation given to us and store the new point in a next_sub_division vector. Once we evaluate all given control points we end up with a populated vector of points for the next subdivision level that is length one less than the original passed-in points.
+</p>
+<br>
+
+
+<b>
+  Take a look at the provided .bzc files and create your own Bezier curve with 6 control points of your choosing. Use this Bezier curve for your screenshots below.
+</b>
+
+
+<b>
+  Show screenshots of each step / level of the evaluation from the original control points down to the final evaluated point. Press <kbd>E</kbd> to step through. Toggle <kbd>C</kbd> to show the completed Bezier curve as well.
+</b>
+<!-- Example of including multiple figures -->
+<div align="middle">
+  <table style="width:100%">
+    <tr align="center">
+      <td>
+        <img src="images/a.png" align="middle" width="400px"/>
+        <figcaption>Level 0</figcaption>
+      </td>
+      <td>
+        <img src="images/b.png" align="middle" width="400px"/>
+        <figcaption>Level 1</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/c.png" align="middle" width="400px"/>
+        <figcaption>Level 2</figcaption>
+      </td>
+      <td>
+        <img src="images/d.png" align="middle" width="400px"/>
+        <figcaption>Level 3</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/e.png" align="middle" width="400px"/>
+        <figcaption>Level 4</figcaption>
+      </td>
+      <td>
+        <img src="images/f.png" align="middle" width="400px"/>
+        <figcaption>Level 5</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr align="center">
+      <td>
+        <img src="images/g.png" align="middle" width="400px"/>
+        <figcaption>Level 6</figcaption>
+      </td>
+      <td>
+        <img src="images/h.png" align="middle" width="400px"/>
+        <figcaption>Final</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+
+<b>
+  Show a screenshot of a slightly different Bezier curve by moving the original control points around and modifying the parameter \(t\) via mouse scrolling.
+</b>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/j.png" align="middle" width="400px"/>
+        <figcaption align="middle"> Moved Control points, new t</figcaption>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="images/k.png" align="middle" width="400px"/>
+        <figcaption align="middle"> Final Bezier Curve </figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+
+<h3 align="middle">Part 2: Bezier Surfaces with Separable 1D de Casteljau</h3>
+<b>
+  Briefly explain how de Casteljau algorithm extends to Bezier surfaces and how you implemented it in order to evaluate Bezier surfaces.
+</b>
+<p>
+  de Casteljau algorithm extends to Bezier surfaces by computing the moving vectors from the initial control points first at parameter u and then interpolating them again to get a final bezier curve interpolated at point v. We implemented this by first iterating through the control points and passing them to the evaluate1D function that internally calls evaluateStep() that returns the final interpolated vector. We do this until we go through all control points and end up with bezier curves that are stored in moving_u. From there we pass our vector moving_u to evalute_1D and return the final bezier curve. 
+</p>
+<br>
+
+
+<b>
+  Show a screenshot of bez/teapot.bez (not .dae) evaluated by your implementation.
+</b>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/unnamed2.png" align="middle" width="400px"/>
+        <figcaption align="middle"> screenshot of bez/teapot.bez</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+
+<h2 align="middle">Section II: Triangle Meshes and Half-Edge Data Structure</h2>
+
+<h3 align="middle">Part 3: Area-Weighted Vertex Normals</h3>
+
+<b>
+  Briefly explain how you implemented the area-weighted vertex normals.
+</b>
+<p>
+  We implemented the area-weighted vertex normals by first finding the areas and normal vectors of all faces using the given vertex (let’s call it v’ for the remainder of this explanation). First, we found the half-edge originating from v’ and created a pointer to it called outer_loop_orig_h. Then with a do-while loop, with condition h != outer_loop_orig_h, we found the three vertices of a triangle by calling h->vertex() (v’), h->next()->vertex() (vertex A), and h->next()->next()->vertex() (vertex B). We calculated the area of that triangle by creating two vectors (vertex A - v’) and (vertex B - v’), taking the dot product between them, and dividing that resulting float by 2. Then we found the normal vector for the face for which we calculated the area for using h->face()->normal(). We traversed to the next triangle using h = h->next()->next()->twin(). When the do while loop terminates we know we’ve visited all the triangles. Having pushed all of the areas and normal vectors into vectors, we loop through and sum all the areas together to get the total area, and we multiply all the vectors with their respective areas. Then we divide all vectors by the found total sum and sum them together into the return vector. 
+</p>
+<br>
+<b>
+  Show screenshots of dae/teapot.dae (not .bez) comparing teapot shading with and without vertex normals. Use <kbd>Q</kbd> to toggle default flat shading and Phong shading.
+</b>
+<p>
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/unnamed-1.png" align="middle" width="400px"/>
+          <figcaption align="middle">Caption goes here.</figcaption>
+        </td>
+        <td>
+          <img src="images/unnamed-4.png" align="middle" width="400px"/>
+          <figcaption align="middle">Caption goes here.</figcaption>
+        </td>
+      </tr>
+      <br>
+      <tr>
+        <td>
+          <img src="images/unnamed-3.png" align="middle" width="400px"/>
+          <figcaption align="middle">Caption goes here.</figcaption>
+        </td>
+        <td>
+          <img src="images/unnamed-2.png" align="middle" width="400px"/>
+          <figcaption align="middle">Caption goes here.</figcaption>
+        </td>
+      </tr>
+    </table>
+  </div>
+</p>
+<br>
+
+
+<h3 align="middle">Part 4: Edge Flip</h3>
+<b>
+  Briefly explain how you implemented the edge flip operation and describe any interesting implementation / debugging tricks you have used.
+</b>
+<p>
+  To implement the edge flip operation we first identify the edge that the given EdgeIter belongs to and get its corresponding halfedge. From there we found all of the other components that belong to the Half-Edge Data structure by performing a series of twin(), next() and vertex() calls until we found all of the corresponding parts in the image below. 
+  When performing the split we see that we need to reassign the edge that is shared by these two triangles to orient itself in the opposite direction. In order to do this the halfedges will be associated with new vertices and the edge itself will be connected to those 2 vertices as well. We do this reassignment by using setNeighbors() on each of the 6 half-edges and associate its correct twin, vertex, edge, and face.  
+</p>
+<br>
+
+
+<b>
+  Show screenshots of the teapot before and after some edge flips.
+</b>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/unnamed-5.png" align="middle" width="400px"/>
+        <figcaption align="middle">Before Edge Flips</figcaption>
+      </td>
+      <td>
+        <img src="images/unnamed-6.png" align="middle" width="400px"/>
+        <figcaption align="middle">After Edge Flips</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+<b>
+    Write about your eventful debugging journey, if you have experienced one.
+</b>
+<p>
+  The bug we faced was that we did not set the face that belonged to the particular halfedge correctly, so when the flip was being performed it was pointing to an incorrect halfedge. We fixed this by setting the faces to be the original halfedge and twin.
+</p>
+<br>
+
+
+<h3 align="middle">Part 5: Edge Split</h3>
+<b>
+  Briefly explain how you implemented the edge split operation and describe any interesting implementation / debugging tricks you have used.
+</b>
+<p>
+  Before we wrote any code, we drew out what the split operation would look like, including the addition of all new required mesh elements. The marked up image below is our work for that. We implemented the edge split operation similar to how we completed the edge flip operation. First we defined all pre-split existing edges, halfedges, vertices, and faces, following the naming/labeling of the ‘before flip’ image given in the “Guide to Implementing Edge Operations on a Halfedge Data Structure”. We defined them with a combination of appropriate next(), vertex(), edge(), and face() calls based on the halfedge h0, returned by calling halfedge() on the input EdgeIter class. After that, we instantiated all new, required, ‘post-split’ edges (3), halfedges (6), faces (2), and vertex (1). We found the appropriate location for the new midpoint vertex by adding and then dividing by 2, the Vector3D objects containing the positions of v1 and v0. Then, following the image we drew with the new components, we make a series of setNeighbors() calls that set/reset all halfedges accordingly. We also remembered to set the halfedges for all new edge, vertex, and face components to the appropriate halfedges. We also reset the halfedges for the existing vertex and face components to some valid halfedges, just to be sure the split operation wouldn’t invalidate the mesh. 
+</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/unnamed-11.png" align="middle" width="400px"/>
+        <figcaption align="middle"> Original Diagram</figcaption>
+      </td>
+      <td>
+        <img src="images/unnamed-10.png" align="middle" width="400px"/>
+        <figcaption align="middle">Annotated Diagram</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+
+<b>
+  Show screenshots of a mesh before and after some edge splits. 
+</b>
+<p>
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/unnamed-65.png" align="middle" width="400px"/>
+          <figcaption align="middle">Before</figcaption>
+        </td>
+        <td>
+          <img src="images/unnamed-7.png" align="middle" width="400px"/>
+          <figcaption align="middle">After</figcaption>
+        </td>
+      </tr>
+      <br>
+    </table>
+  </div>
+</p>
+<br>
+
+
+<b>
+    Show screenshots of a mesh before and after a combination of both edge splits and edge flips.
+</b>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/unnamed-8.png" align="middle" width="400px"/>
+        <figcaption align="middle">Before</figcaption>
+      </td>
+      <td>
+        <img src="images/unnamed-9.png" align="middle" width="400px"/>
+        <figcaption align="middle">After</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+<br>
+
+
+<b>
+    Write about your eventful debugging journey, if you have experienced one.
+</b>
+<p>
+  Thanks to the work we did before we started coding, we genuinely faced no bugs implementing this task and managed to do the split operation (without border case) on the first try!
+
+</p>
+<br>
+
+
+<b>
+    If you have implemented support for boundary edges, show screenshots of your implementation properly handling split operations on boundary edges.
+</b>
+<p>
+    YOUR RESPONSE GOES HERE
+</p>
+<br>
+
+
+<h3 align="middle">Part 6: Loop Subdivision for Mesh Upsampling</h3>
+<b>
+  Briefly explain how you implemented the loop subdivision and describe any interesting implementation / debugging tricks you have used.
+</b>
+<p>
+  When implementing loop subdivision we followed the comments given in the starter code. 
+  Before anything, we loop through all the edges and all of the vertices and set their isNew booleans to false, then for all edges we also set their isSplit boolean (described below) to false as well. 
+  Then we went through all of our original (non-split) vertices and computed the new positions for all of them in the mesh. We do so by using the given equation ((1 - n * u) * original_position + u * original_neighbor_position_sum) on each vertex using the Vector3D object operator functions since all vertex positions are kept as Vector3D objects. We implemented a helper function sumNeighbourPositions which is a modification of the printNeighbourPosition function given to us in the HalfEdge Class primer. The loop is kept the same but instead of printing out the values, we add it to a running sum variable which we return after all neighbors have been visited. We use this helper function to compute the value for original_neighbor_position_sum. We store the new position in the newPosition variable of each original vertex. 
+  Then we iterate through all edges, calculating the newPosition for the new vertices that will be generated by the split operation. We follow the equation (3/8 * (A + B) + 1/8 * (C + D)) as given by the spec. After calculating this value we store it in the Edge object newPosition variable. 
+  Next, iterating through all the edges a second time, we check what each edge’s isNew variable is set to. If isNew is false, we split the edge, otherwise we skip processing the edge. We had to go back to our implementation for Task 5 and make minor edits to the function. Our primary change was that we added a secondary boolean variable to the Edge class called isSplit. In our split function we set this isSplit to true for the original edge e0 passed into the function and for the new edge n_e2 which visually is the continuation of the original e0 edge. We also added a line that set the value of the newPosition variable of the new vertex ‘midpoint’ to be the newPosition of the edge passed in e0. 
+  Coming back to Task 6, we iterate through all the edges a third time, we check if the edge is a new edge but not the continuation of a split edge, i.e. if isNew is true and isSplit is false. If this condition is met, we then check that for the two vertices of that edge one is new and the other is in the original mesh, i.e. one vertex’s isNew is set to true and the other is set to false. If both of these conditions are true, we call flipEdge on the edge we were processing. We make sure to set the isNew and isSplit booleans to false for each edge after processing it.
+  Finally, we iterate through all vertices for one final time, as we set the Vertex class variable position equal to the class variable newPosition. We also set all vertex isNew booleans to false.   
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/unnamed-12.png" align="middle" width="400px"/>
+            <figcaption align="middle">No loop subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/unnamed-13.png" align="middle" width="400px"/>
+            <figcaption align="middle">1 loop subdivision</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/unnamed-14.png" align="middle" width="400px"/>
+            <figcaption align="middle">2 loop subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/unnamed-15.png" align="middle" width="400px"/>
+            <figcaption align="middle">3 loop subdivision</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/unnamed-16.png" align="middle" width="400px"/>
+            <figcaption align="middle">No loop subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/unnamed-17.png" align="middle" width="400px"/>
+            <figcaption align="middle">1 loop subdivision</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/unnamed-18.png" align="middle" width="400px"/>
+            <figcaption align="middle">2 loop subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/unnamed-19.png" align="middle" width="400px"/>
+            <figcaption align="middle">3 loop subdivision</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/unnamed-20.png" align="middle" width="400px"/>
+            <figcaption align="middle">4 loop subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/unnamed-21.png" align="middle" width="400px"/>
+            <figcaption align="middle">5 loop subdivision</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/unnamed-22.png" align="middle" width="400px"/>
+            <figcaption align="middle">6 loop subdivision</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/unnamed-23.png" align="middle" width="400px"/>
+            <figcaption align="middle">No loop subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/unnamed-24.png" align="middle" width="400px"/>
+            <figcaption align="middle">1 loop subdivision</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/unnamed-25.png" align="middle" width="400px"/>
+            <figcaption align="middle">2 loop subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/unnamed-26.png" align="middle" width="400px"/>
+            <figcaption align="middle">3 loop subdivision</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/unnamed-27.png" align="middle" width="400px"/>
+            <figcaption align="middle">4 loop subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/unnamed-28.png" align="middle" width="400px"/>
+            <figcaption align="middle">5 loop subdivision</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/unnamed-29.png" align="middle" width="400px"/>
+            <figcaption align="middle">6 loop subdivision</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/unnamed-30.png" align="middle" width="400px"/>
+            <figcaption align="middle">No loop subdivision</figcaption>
+          </td>
+          <td>
+            <img src="images/unnamed-31.png" align="middle" width="400px"/>
+            <figcaption align="middle">1 loop subdivision</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="images/unnamed-32.png" align="middle" width="400px"/>
+            <figcaption align="middle">2 loop subdivision</figcaption>
+          </td>
+        </tr>
+        <br>
+      </table>
+    </div>
+</p>
+<br>
+
+
+<b>
+  Take some notes, as well as some screenshots, of your observations on how meshes behave after loop subdivision. What happens to sharp corners and edges? Can you reduce this effect by pre-splitting some edges?
+</b>
+<p>
+  Meshes seem to get smoother after loop subdivision, this is seen in the teapot and the beast mesh. Both meshes are meant to model smooth, round objects/features. Before any subdivision the triangles are pretty obvious and the objects seem to have edges/ridges which they shouldn’t. After loop subdivision, the objects contain less ridges. After three loop subdivisions, the teapot is rendered perfectly smooth and circular. After two loop subdivisions, the skin and muscle definition on the beast mesh seem smooth and more believable. 
+  Something bizarre happens to really sharp edges and corners as seen in the images of the cube subdivision. Even Though the cube as a whole becomes more spherical, the locations of the original edges and corners are apparent as they become points of irregularity on the subdivided mesh. The cube thus becomes slightly asymmetric. 
+</p>
+<br>
+
+
+<b>
+  Load dae/cube.dae. Perform several iterations of loop subdivision on the cube. Notice that the cube becomes slightly asymmetric after repeated subdivisions. Can you pre-process the cube with edge flips and splits so that the cube subdivides symmetrically? Document these effects and explain why they occur. Also explain how your pre-processing helps alleviate the effects.
+</b>
+<p>
+  We tried preprocessing the cube so that the cube subdivides symmetrically by splitting the edge going across each face of the cube such that there is an ‘X’ pattern on each face of the cube connecting the diagonal corners. This gets rid of the asymmetry as it was being created by the fact that the corners had different numbers of triangles surrounding them. Now with the mesh symmetric (all corners have the same shape and number of triangles surrounding them), the cube subdivides symmetrically.
+</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/unnamed-33.png" align="middle" width="400px"/>
+        <figcaption align="middle">No loop subdivision</figcaption>
+      </td>
+      <td>
+        <img src="images/unnamed-34.png" align="middle" width="400px"/>
+        <figcaption align="middle">1 loop subdivision</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="images/unnamed-35.png" align="middle" width="400px"/>
+        <figcaption align="middle">2 loop subdivision</figcaption>
+      </td>
+      <td>
+        <img src="images/unnamed-36.png" align="middle" width="400px"/>
+        <figcaption align="middle">3 loop subdivision</figcaption>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="images/unnamed-37.png" align="middle" width="400px"/>
+        <figcaption align="middle">4 loop subdivision</figcaption>
+      </td>
+      <td>
+        <img src="images/unnamed-38.png" align="middle" width="400px"/>
+        <figcaption align="middle">5 loop subdivision</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="images/unnamed-39.png" align="middle" width="400px"/>
+        <figcaption align="middle">6 loop subdivision</figcaption>
+      </td>
+    </tr>
+    <br>
+  </table>
+</div>
+<br>
+
+
+<b>
+    If you have implemented any extra credit extensions, explain what you did and document how they work with screenshots.
+</b>
+<p>
+    YOUR RESPONSE GOES HERE
+</p>
+<br>
+
+
+<h3 align="middle">Part 7 (Optional, Possible Extra Credit)</h3>
+<b>
+    Save your best polygon mesh as partsevenmodel.dae in your docs folder and show us a screenshot of the mesh in your write-up.
+</b>
+<p>
+    YOUR RESPONSE GOES HERE
+</p>
+<br>
+
+
+<b>
+    Include a series of screenshots showing your original mesh and your mesh after one and two rounds of subdivision. If you have used custom shaders, include screenshots of your mesh with those shaders applied as well.
+</b>
+<p>
+    YOUR RESPONSE GOES HERE
+</p>
+<br>
+
+
+<b>
+    Describe what you have done to enhance your mesh beyond the simple humanoid mesh described in the tutorial.
+</b>
+<p>
+    YOUR RESPONSE GOES HERE
+</p>
+<br>
+
+
+</body>
 </html>
